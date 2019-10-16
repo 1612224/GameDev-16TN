@@ -5,73 +5,57 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public int Speed;
     public KeyCode Left;
     public KeyCode Right;
+    public KeyCode Jump;
 
-    private Vector2 currentPosition;
-    private bool wasFacingRight;
-    private bool isFacingRight;
-    private bool isMoving;
+    public MovementController MovementScript;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        currentPosition = GetComponent<Transform>().position;
-        wasFacingRight = true;
-        isFacingRight = true;
-        isMoving = false;
-    }
+    private int move = 0;
+    private bool startToJump = false;
 
-    // Update is called once per frame
     void Update()
     {
         HandleInput();
-        ControlAnimation();
-    }
-
-    private void ControlAnimation()
-    {
-        GetComponent<Animator>().SetBool("IsMoving", isMoving);
-        if (isFacingRight != wasFacingRight)
-        {
-            GetComponent<Transform>().Rotate(Vector3.up, 180.0f);
-            wasFacingRight = isFacingRight;
-        }
-    }
-
-    private void HandleInput()
-    {
-        if (Input.GetKeyDown(Left))
-        {
-            isFacingRight = false;
-        }
-        else if (Input.GetKeyDown(Right))
-        {
-            isFacingRight = true;
-        }
-
-        isMoving = Input.GetKey(Left) || Input.GetKey(Right);
+        UpdateAnimation();
     }
 
     private void FixedUpdate()
     {
-        currentPosition = CalculateNewPosition();
-        GetComponent<Transform>().position = currentPosition;
+        MovementScript.Move(move, startToJump);
     }
 
-    private Vector2 CalculateNewPosition()
+    private void UpdateAnimation()
     {
-        if (!isMoving)
+        GetComponent<Animator>().SetBool("IsMoving", move != 0);
+    }
+
+    private void HandleInput()
+    {
+        if (Input.GetKey(Left))
         {
-            return currentPosition;
+            move = -1;
+        }
+        else if (Input.GetKey(Right))
+        {
+            move = 1;
+        }
+        else
+        {
+            move = 0;
         }
 
-        Vector2 offset = Vector2.right * Speed * Time.fixedDeltaTime;
-        if (isFacingRight)
-        {
-            return currentPosition + offset;
-        }
-        return currentPosition - offset;
+        startToJump = Input.GetKeyDown(Jump);
+    }
+
+    public void OnLanding()
+    {
+        GetComponent<Animator>().SetBool("IsJumping", false);
+    }
+
+    public void OnStartNewJump()
+    {
+        GetComponent<Animator>().SetBool("IsJumping", true);
+        GetComponent<Animator>().Play("Player_Jump", -1, 0.0f);
     }
 }
