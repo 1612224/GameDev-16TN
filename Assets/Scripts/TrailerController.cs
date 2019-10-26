@@ -6,14 +6,36 @@ using UnityEngine.Video;
 
 public class TrailerController : MonoBehaviour
 {
-    // Update is called once per frame
-    void Update()
+    public GameObject VideoTrailer;
+    public GameObject MenuUI;
+
+    private bool trailerFinished = false;
+
+    private void Start()
     {
-        GetComponent<VideoPlayer>().loopPointReached += onTrailerEnd;       
+        VideoTrailer.GetComponent<VideoPlayer>().loopPointReached += onTrailerEnd;
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            skipTrailer();
+        }
     }
 
     private void onTrailerEnd(VideoPlayer source)
     {
-        gameObject.SetActive(false);
+        skipTrailer();
+    }
+
+    private void skipTrailer()
+    {
+        if (!trailerFinished)
+        {
+            VideoTrailer.SetActive(false);
+            MenuUI.SetActive(true);
+            trailerFinished = true;
+        }
     }
 }
